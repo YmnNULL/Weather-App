@@ -7,17 +7,22 @@ const searchInput = document.getElementById("search");
 const searchBtn = document.getElementById("btn");
 const content = document.querySelector(".content");
 
-showWeather()
+document.getElementById("spinner").classList.remove("d-none");
 
-function showWeather(city = "Cairo") {
-    document.getElementById("spinner").classList.remove("d-none");
+navigator.geolocation?.getCurrentPosition(
+    ({ coords: { latitude, longitude } }) => {
+        const lat = latitude;
+        const long = longitude;
+        showWeather(`${lat},${long}`)
+    },
+    (err) => showWeather("Cairo")
+);
+
+function showWeather(city) {
     fetch(`https://api.weatherapi.com/v1/forecast.json?key=2b30442408a3486988e105935252506&q=${city}&days=3`)
         .then(response => response.json())
         .then(data => {
-
-
             const arrOfThreeDays = [];
-
             for (let i = 0; i < 3; i++) {
                 arrOfThreeDays.push({
                     dayName: returnDate(data.forecast.forecastday[i].date).date,
@@ -35,11 +40,19 @@ function showWeather(city = "Cairo") {
             for (let i = 0; i < arrOfThreeDays.length; i++) {
                 makeOutPut(arrOfThreeDays[i].dayName, arrOfThreeDays[i].formattedDate, arrOfThreeDays[i].location, arrOfThreeDays[i].tempC, arrOfThreeDays[i].dataText, arrOfThreeDays[i].icon, arrOfThreeDays[i].wind, arrOfThreeDays[i].avghumidity, arrOfThreeDays[i].windDir)
             }
-        }).catch((e) => {
-
+        }).catch(() => {
+            showError()
         }).finally(() => {
             document.getElementById("spinner").classList.add("d-none");
         });
+}
+
+function showError() {
+    const alert = document.createElement("div");
+    alert.className = "alert alert-danger bg-danger my-5 py-3";
+    alert.setAttribute("role", "alert");
+    alert.innerHTML = "⚠️ Failed to load weather data.";
+    content.appendChild(alert);
 }
 
 searchInput.addEventListener("keydown", (e) => {
@@ -54,7 +67,6 @@ searchBtn.addEventListener("click", () => {
     showWeather(searchInput.value);
 });
 
-
 function returnDate(myDate) {
     const date = new Date(myDate);
     const day = date.getDate();
@@ -68,8 +80,6 @@ function returnDate(myDate) {
         formatted: formattedDate
     }
 }
-
-
 
 function makeDivAddClass(className) {
     const div = document.createElement("div");
