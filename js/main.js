@@ -9,11 +9,14 @@ const content = document.querySelector(".content");
 
 document.getElementById("spinner").classList.remove("d-none");
 
+let lat;
+let long;
+
 navigator.geolocation?.getCurrentPosition(
     ({ coords: { latitude, longitude } }) => {
-        const lat = latitude;
-        const long = longitude;
-        showWeather(`${lat},${long}`)
+        lat = latitude;
+        long = longitude;
+        showWeather(`${lat},${long}`);
     },
     (err) => showWeather("Cairo")
 );
@@ -58,13 +61,21 @@ function showError() {
 searchInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         content.innerHTML = "";
-        showWeather(searchInput.value);
+        if (searchInput.value.trim() == "") {
+            showWeather(`${lat},${long}`);
+        } else {
+            showWeather(searchInput.value.trim());
+        }
     }
 })
 
 searchBtn.addEventListener("click", () => {
     content.innerHTML = "";
-    showWeather(searchInput.value);
+    if (searchInput.value.trim() == "") {
+        showWeather(`${lat},${long}`);
+    } else {
+        showWeather(searchInput.value.trim());
+    }
 });
 
 function returnDate(myDate) {
